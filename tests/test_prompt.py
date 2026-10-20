@@ -8,6 +8,7 @@ from app import load_system_prompt
 @pytest.mark.langsmith
 def test_critical_refund_policy_is_present():
     prompt = load_system_prompt()
+    
     t.log_inputs({"rule": "退款到账时间和申请期限"})
     t.log_reference_outputs({"contains": ["7天", "3个工作日"]})
     t.log_outputs({"prompt": prompt})
