@@ -54,6 +54,6 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           LANGSMITH_TRACING: 'true'
           LANGSMITH_PROJECT: 'faq-ci'
-          MODEL_NAME:'qwen3.8-flash'
-          OPENAI_BASE_URL:'https://ws-tc2q6qaypsmeimfq.cn-beijing.maas.aliyuncs.com/compatible-mode/v1'
+          MODEL_NAME: 'qwen3.8-flash'
+          OPENAI_BASE_URL: 'https://ws-tc2q6qaypsmeimfq.cn-beijing.maas.aliyuncs.com/compatible-mode/v1'
         run: python -m pytest -q tests/test_live_regression.py
