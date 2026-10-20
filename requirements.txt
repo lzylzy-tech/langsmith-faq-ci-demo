@@ -3,3 +3,4 @@ langsmith[pytest]
 langchain-core
 langchain-openai
 python-dotenv
+langchain>=1.0,<2.0
