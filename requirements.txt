@@ -1,0 +1,5 @@
+pytest>=8,<10
+langsmith[pytest]
+langchain-core
+langchain-openai
+python-dotenv

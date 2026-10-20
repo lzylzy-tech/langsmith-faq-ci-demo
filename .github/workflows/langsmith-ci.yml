@@ -1,0 +1,59 @@
+name: LangSmith Prompt CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app.py'
+      - 'prompts/**'
+      - 'tests/**'
+      - 'requirements.txt'
+      - '.github/workflows/langsmith-ci.yml'
+  pull_request:
+    paths:
+      - 'app.py'
+      - 'prompts/**'
+      - 'tests/**'
+      - 'requirements.txt'
+      - '.github/workflows/langsmith-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prompt_unit_tests:
+    name: Prompt unit tests (no API keys)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements.txt
+      - name: Verify prompt invariants
+        env:
+          LANGSMITH_TEST_TRACKING: 'false'
+        run: python -m pytest -q tests/test_prompt.py
+
+  live_langsmith_regression:
+    name: Live LangSmith regression (trusted branches)
+    needs: prompt_unit_tests
+    # 外部 fork PR 不给此 Job 提供 Secrets；仅运行在仓库内部可信 PR、main push 或手动触发。
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements.txt
+      - name: Live regression against frozen LangSmith dataset
+        env:
+          LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LANGSMITH_TRACING: 'true'
+          LANGSMITH_PROJECT: 'faq-ci'
+          MODEL_NAME:'qwen3.8-flash'
+          OPENAI_BASE_URL:'https://ws-tc2q6qaypsmeimfq.cn-beijing.maas.aliyuncs.com/compatible-mode/v1'
+        run: python -m pytest -q tests/test_live_regression.py
